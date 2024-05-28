@@ -33,15 +33,38 @@ public class EmailService {
         message.setText(text);
         mailSender.send(message);
     }
-    // Send email with template
-    public void sendHtmlEmail(String to, String subject, String name) throws MessagingException, IOException {
+    // Send email with HTML template
+    public void sendHtmlEmail(String to, String subject, String name, String text) throws MessagingException, IOException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         // Load the HTML template
         Context context = new Context();
         context.setVariable("name", name);
+        context.setVariable("text", text);
         String html = templateEngine.process("email-template", context);
+
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(html, true);
+
+        // Add the inline image, use the content id (cid) in the HTML 'src' attribute
+        ClassPathResource logo = new ClassPathResource("static/images/logo.png");
+        helper.addInline("logo", logo);
+
+        mailSender.send(message);
+    }
+
+    // Send confirm email with template
+    public void sendConfirmEmail(String to, String subject, String name, String link) throws MessagingException, IOException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        // Load the HTML template
+        Context context = new Context();
+        context.setVariable("name", name);
+        context.setVariable("link", link);
+        String html = templateEngine.process("confirm-template", context);
 
         helper.setTo(to);
         helper.setSubject(subject);
